@@ -1,26 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Olive & Warm Beige Theme Colors */
+  --primary: #556244;           /* Deep Olive Accent */
+  --primary-hover: #455037;     /* Darker Olive for Hover States */
+  --primary-light: #e8ece1;    /* Light Olive Tint */
+  
+  --emerald-accent: #6b7256;    /* Sage / Olive Secondary Accent */
+  --emerald-light: #f1f3ec;     /* Light Sage Tint */
+  
+  --background: #faf8f5;        /* Soft Warm Beige Light Background */
+  --card-bg: #ffffff;          /* Pure White Card */
+  --card-border: #d5cdbf;      /* Soft Warm Sand Border */
+  --foreground: #2c3325;        /* Dark Earthy Olive/Text */
+  --muted-text: #5a564a;        /* Muted Warm Taupe Text */
+  
+  --glass-bg: rgba(250, 248, 245, 0.85);
+  --glass-border: rgba(213, 205, 191, 0.8);
+  --shadow-sm: 0 2px 8px -2px rgba(44, 51, 37, 0.05);
+  --shadow-md: 0 10px 25px -5px rgba(44, 51, 37, 0.08), 0 8px 10px -6px rgba(44, 51, 37, 0.04);
+  --shadow-glow: 0 0 20px -3px rgba(85, 98, 68, 0.15);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-light: var(--primary-light);
+
+  --color-accent: var(--emerald-accent);
+  --color-accent-light: var(--emerald-light);
+
+  --color-card: var(--card-bg);
+  --color-border: var(--card-border);
+  --color-muted: var(--muted-text);
+
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #1e2319;       /* Deep Dark Olive Background */
+    --card-bg: #252b1f;          /* Dark Olive Card Background */
+    --card-border: #3d4734;      /* Medium Dark Olive Border */
+    --foreground: #f5f2eb;       /* Soft Cream/Off-White Text */
+    --muted-text: #c5baa2;       /* Light Warm Beige Muted Text */
+    
+    --glass-bg: rgba(37, 43, 31, 0.85);
+    --glass-border: rgba(61, 71, 52, 0.8);
+    --primary-light: rgba(85, 98, 68, 0.25);
+    --emerald-light: rgba(107, 114, 86, 0.25);
+    --shadow-sm: 0 2px 8px -2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    --shadow-glow: 0 0 25px -2px rgba(139, 151, 107, 0.25);
   }
+}
+
+* {
+  box-sizing: border-box;
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+/* UI Helper Classes & Micro-Interactions */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+}
+
+.medical-gradient-text {
+  background: linear-gradient(135deg, #556244 0%, #8b976b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.medical-gradient-bg {
+  background: linear-gradient(135deg, #556244 0%, #6b7256 100%);
+}
+
+.hover-lift {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Custom Styled Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(107, 114, 86, 0.3);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 86, 0.5);
 }

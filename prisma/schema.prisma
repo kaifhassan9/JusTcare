@@ -1,0 +1,101 @@
+// Prisma schema
+
+generator client {
+  provider = "prisma-client-js"
+    output   = "../src/generated/prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      UserRole @default(CUSTOMER)
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+    prescriptions Prescription[]
+}
+
+enum UserRole {
+  CUSTOMER
+  PHARMACY_ADMIN
+}
+
+model Product {
+  id                   Int         @id @default(autoincrement())
+  name                 String
+  category             String
+  price                Float
+  image                String
+  requiresPrescription Boolean     @default(false)
+  stockCount           Int         @default(0)
+  description          String?
+  orderItems           OrderItem[]
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+}
+
+model Order {
+  id              Int         @id @default(autoincrement())
+  orderNumber     String      @unique // e.g. "#MED123456"
+  userId          Int?
+  user            User?       @relation(fields: [userId], references: [id])
+  customerName    String
+  customerPhone   String
+  customerEmail   String?
+  address         String
+  city            String
+  state           String
+  pincode         String
+  totalAmount     Float
+  status          OrderStatus @default(PENDING)
+  paymentMethod   String      @default("COD")
+  prescriptionUrl String?     // File path or URL to uploaded prescription
+  items           OrderItem[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+    prescription  Prescription?
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float   // Price snapshot at purchase time
+}
+
+enum OrderStatus {
+  PENDING
+  VERIFYING_PRESCRIPTION
+  PREPARING
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+model Prescription {
+  id         Int      @id @default(autoincrement())
+  userId     Int?
+  user       User?    @relation(fields: [userId], references: [id])
+  orderId    Int?     @unique
+  order      Order?   @relation(fields: [orderId], references: [id])
+  imageUrl   String
+  status     PrescriptionStatus @default(PENDING)
+  reviewNote String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+enum PrescriptionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
