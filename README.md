@@ -1,36 +1,132 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# JusTcare 
 
-## Getting Started
+JusTcare is a **full-stack online pharmacy/medical store web application** currently under development.
 
-First, run the development server:
+The goal of this project is to provide a simple and user-friendly platform where customers can browse medicines and healthcare products, manage their cart, and place orders online.
+
+> 🚧 **Status:** Under Development
+
+## 🛠️ Tech Stack
+
+### Frontend
+
+* Next.js
+* React
+* TypeScript
+* Tailwind CSS
+
+### Backend & Database
+
+* Next.js API Routes
+* Prisma ORM
+* PostgreSQL
+
+### Development Tools
+
+* Git & GitHub
+* npm
+
+## ✨ Current Features
+
+* 🏠 Home page
+* 💊 Medicine/product listing
+* 🔎 Product browsing
+* 📦 Product details
+* 🛒 Shopping cart
+* ➕ Add/remove products from cart
+* 🔢 Update product quantity
+* 💰 Cart total calculation
+* 🗄️ Database integration with Prisma
+* 👨‍💼 Product management
+* 📋 Prescription-required product support
+
+## 🚧 Currently Working On
+
+* User authentication
+* Checkout and order placement
+* Order management
+* Admin dashboard improvements
+* Product management improvements
+* UI/UX improvements
+* Testing and bug fixing
+
+## 📁 Project Structure
+
+```text
+JusTcare/
+├── prisma/
+│   ├── migrations/
+│   └── schema.prisma
+│
+├── public/
+│
+├── src/
+│   ├── app/
+│   ├── components/
+│   ├── context/
+│   └── ...
+│
+├── .gitignore
+├── package.json
+├── prisma.config.ts
+└── README.md
+```
+
+## ⚙️ Getting Started
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/kaifhassan9/JusTcare.git
+cd JusTcare
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Configure environment variables
+
+Create a `.env` file in the root directory:
+
+```env
+DATABASE_URL="your_database_url"
+```
+
+> Never commit your `.env` file or expose database credentials/API keys on GitHub.
+
+### 4. Run Prisma migrations
+
+```bash
+npx prisma migrate dev
+```
+
+### 5. Start the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open **http://localhost:3000** in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📌 Future Improvements
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+* User authentication and authorization
+* Online order placement
+* Order tracking
+* Admin dashboard
+* Payment integration
+* Prescription upload
+* Advanced product search and filtering
+* Email notifications
+* Improved responsive design
 
-## Learn More
+## 👨‍💻 Developer
 
-To learn more about Next.js, take a look at the following resources:
+**Kaif Hassan**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+GitHub: [kaifhassan9](https://github.com/kaifhassan9)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+⭐ This project is currently under active development.
