@@ -69,7 +69,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    const body = await request.json();
+   const body = await request.json();
     const {
       name,
       category,
@@ -80,33 +80,56 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       description,
     } = body;
 
-    // Same validation approach as your POST route — reject bad values,
-    // don't just silently accept whatever the client sends
-    if (!name || !category || price === undefined || !image) {
-      return NextResponse.json(
-        { error: "Name, category, price and image are required" },
-        { status: 400 }
-      );
+    // Two modes: a FULL edit (from the Edit Product page — all fields
+    // required, validated exactly as before) or a PARTIAL update (e.g. the
+    // bulk image tool, which only sends { image }). We detect which mode
+    // by checking whether name/category/price were sent at all.
+    const isFullUpdate = name !== undefined || category !== undefined || price !== undefined;
+
+    if (isFullUpdate) {
+      if (!name || !category || price === undefined || !image) {
+        return NextResponse.json(
+          { error: "Name, category, price and image are required" },
+          { status: 400 }
+        );
+      }
+
+      if (Number(price) < 0) {
+        return NextResponse.json({ error: "Price cannot be negative" }, { status: 400 });
+      }
+
+      if (Number(stockCount ?? 0) < 0) {
+        return NextResponse.json({ error: "Stock cannot be negative" }, { status: 400 });
+      }
+
+      const updatedProduct = await prisma.product.update({
+        where: { id: productId },
+        data: {
+          name: String(name).trim(),
+          category: String(category).trim(),
+          price: Number(price),
+          image: String(image).trim(),
+          requiresPrescription: Boolean(requiresPrescription),
+          stockCount: Number(stockCount ?? 0),
+          description: description?.trim() || null,
+        },
+      });
+
+      return NextResponse.json({
+        message: "Product updated successfully",
+        product: updatedProduct,
+      });
     }
 
-    if (Number(price) < 0) {
-      return NextResponse.json({ error: "Price cannot be negative" }, { status: 400 });
-    }
-
-    if (Number(stockCount ?? 0) < 0) {
-      return NextResponse.json({ error: "Stock cannot be negative" }, { status: 400 });
+    // Partial update — only touch fields that were actually sent
+    if (image !== undefined && !String(image).trim()) {
+      return NextResponse.json({ error: "Image cannot be empty" }, { status: 400 });
     }
 
     const updatedProduct = await prisma.product.update({
       where: { id: productId },
       data: {
-        name: String(name).trim(),
-        category: String(category).trim(),
-        price: Number(price),
-        image: String(image).trim(),
-        requiresPrescription: Boolean(requiresPrescription),
-        stockCount: Number(stockCount ?? 0),
-        description: description?.trim() || null,
+        ...(image !== undefined && { image: String(image).trim() }),
       },
     });
 

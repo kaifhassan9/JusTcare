@@ -82,7 +82,7 @@ export default function OrdersPage() {
         <Navbar />
         <div className="flex min-h-[60vh] items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin text-4xl">⏳</div>
+            <div className="animate-spin text-4xl"><i className="fa-solid fa-spinner"></i></div>
             <p className="mt-4 font-bold text-[#6B6650]">Loading your orders...</p>
           </div>
         </div>
@@ -97,7 +97,7 @@ export default function OrdersPage() {
         <Navbar />
         <div className="flex min-h-[60vh] items-center justify-center px-4">
           <div className="text-center">
-            <div className="text-5xl">❌</div>
+            <div className="text-5xl"><i className="fa-solid fa-circle-exclamation"></i></div>
             <h1 className="mt-4 text-2xl font-extrabold text-[#3D3A2E]">Unable to Load Orders</h1>
             <p className="mt-2 text-[#6B6650]">{error}</p>
             <button

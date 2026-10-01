@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState, FormEvent } from "react";
 import { useCart } from "@/context/CartContext";
+import LoginModal from "@/components/LoginModal";
 
 
 interface SearchResult {
@@ -21,7 +22,7 @@ interface SearchResult {
 
 export default function Navbar() {
   const router = useRouter();
-  const { cartCount } = useCart();
+const { cartItemCount } = useCart();
   const [searchQuery, setSearchQuery] = useState("");
 
   // Location Drawer States
@@ -32,6 +33,8 @@ export default function Navbar() {
   const [isSearching, setIsSearching] = useState(false);
   const [loading, setLoading] = useState(false);
   const pathname = usePathname();
+const [isLoginOpen, setIsLoginOpen] = useState(false);
+const [showMobileSearch, setShowMobileSearch] = useState(false);
 
   const [user, setUser] = useState<{
     name: string;
@@ -104,14 +107,17 @@ export default function Navbar() {
     return () => clearTimeout(timer);
   }, [manualInput]);
 
-  async function handleLogout() {
+    async function handleLogout() {
     try {
-      const response = await fetch("/api/auth/logout", { method: "POST" });
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+      });
+
       const data = await response.json();
 
       if (data.success) {
         setUser(null);
-        setSelectedLocation("Your location"); // Reset displayed location on logout
+        window.location.href = "/"; 
       }
     } catch (error) {
       console.error("Logout error:", error);
@@ -186,7 +192,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 shrink-0">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#6B7256] text-white text-xl shadow-sm">
-              💊
+              <i className="fa-solid fa-staff-snake"></i>
             </div>
             <div>
               <div className="font-[family-name:var(--font-poppins)] text-xl font-bold text-[#3D3A2E] flex items-center gap-1">
@@ -222,12 +228,21 @@ export default function Navbar() {
 
           {/* Action Group */}
           <div className="flex items-center gap-2.5 sm:gap-3">
+                {pathname !== "/" && (
+              <button
+                onClick={() => setShowMobileSearch((s) => !s)}
+                className="flex md:hidden items-center justify-center h-10 w-10 rounded-full border border-[#DDD3BC] bg-white text-[#3D3A2E] hover:bg-[#EDE6D6] transition"
+                aria-label="Search"
+              >
+                <i className="fa-solid fa-magnifying-glass"></i>
+              </button>
+            )}
             <button
               onClick={() => setIsDrawerOpen(true)}
               className="hidden md:flex items-center gap-2 rounded-full border border-[#DDD3BC] bg-white px-3.5 py-2 text-sm hover:bg-[#EDE6D6] transition"
             >
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#6B7256]/15 text-[#6B7256] text-xs">
-                📍
+                <i className="fa-solid fa-location-dot"></i>
               </span>
               <span className="text-left leading-tight max-w-[120px] truncate">
                 <span className="block text-[10px] font-semibold uppercase tracking-wide text-[#8B8570]">
@@ -244,63 +259,105 @@ export default function Navbar() {
               href="/cart"
               className="relative flex items-center gap-2 rounded-full bg-white border border-[#DDD3BC] px-3.5 py-2.5 text-sm font-semibold text-[#3D3A2E] hover:bg-[#EDE6D6] transition"
             >
-              <span className="text-lg">🛒</span>
-              {cartCount > 0 && (
-                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#8B7355] px-1.5 text-xs font-bold text-white">
-                  {cartCount}
-                </span>
-              )}
+              <span className="text-lg"><i className="fa-solid fa-cart-shopping"></i></span>
+                {cartItemCount > 0 && (
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#8B7355] px-1.5 text-xs font-bold text-white">
+                {cartItemCount}
+              </span>
+            )}
             </Link>
 
-            {/* Account / Login */}
-            {user ? (
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/account"
-                  className="flex items-center gap-2 rounded-full border border-[#DDD3BC] bg-white px-3.5 py-2.5 text-sm font-semibold text-[#3D3A2E] hover:border-[#6B7256] hover:text-[#6B7256] transition"
-                >
-                  <span>👤</span>
-                  <span>{user.name}</span>
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="rounded-full border border-red-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-red-500 hover:bg-red-50 transition"
-                >
-                  Logout
-                </button>
-              </div>
-            ) : (
-              <Link
-                href="/login"
-                className="rounded-full bg-[#6B7256] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#5a6047] transition"
-              >
-                Login
-              </Link>
-            )}
+           {/* Account / Login */}
+{user ? (
+  <div className="flex items-center gap-2">
+    <Link
+      href="/account"
+      className="flex items-center gap-2 rounded-full border border-[#DDD3BC] bg-white px-3 sm:px-3.5 py-2.5 text-sm font-semibold text-[#3D3A2E] hover:border-[#6B7256] hover:text-[#6B7256] transition"
+    >
+      <span><i className="fa-solid fa-user"></i></span>
+      <span className="hidden sm:inline max-w-[100px] truncate">{user.name}</span>
+    </Link>
+    <button
+      onClick={handleLogout}
+      className="flex items-center justify-center h-10 w-10 sm:w-auto sm:px-3.5 sm:py-2.5 rounded-full border border-red-200 bg-white text-sm font-semibold text-red-500 hover:bg-red-50 transition"
+      aria-label="Logout"
+    >
+      <i className="fa-solid fa-right-from-bracket sm:hidden"></i>
+      
+    </button>
+  </div>
+) : (
+  <button
+    type="button"
+    onClick={() => setIsLoginOpen(true)}
+    className="rounded-full bg-[#6B7256] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#5a6047] transition cursor-pointer"
+  >
+    Login
+  </button>
+)}
+
+      {/* Render Login Popup Modal */}
+      <LoginModal 
+        isOpen={isLoginOpen} 
+        onClose={() => setIsLoginOpen(false)} 
+      />
+    
           </div>
         </div>
+           {showMobileSearch && pathname !== "/" && (
+          <div className="md:hidden px-4 pb-3">
+            <form onSubmit={handleSearch} className="flex w-full items-center rounded-full bg-white border border-[#DDD3BC] px-4 py-2.5">
+              <svg className="h-4 w-4 text-[#8B8570] mr-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search medicines..."
+                autoFocus
+                className="w-full bg-transparent text-sm outline-none placeholder-[#8B8570] text-[#3D3A2E]"
+              />
+              <button type="submit" className="rounded-full bg-[#6B7256] px-4 py-1.5 text-xs font-semibold text-white shrink-0">
+                Go
+              </button>
+            </form>
+          </div>
+        )}
 
-        {/* Navigation Sub-bar */}
-        <div className="border-t border-[#DDD3BC] bg-[#EDE6D6]/60">
-          <nav className="mx-auto flex max-w-7xl items-center gap-1.5 px-4 sm:px-6 py-2.5 overflow-x-auto text-sm font-semibold text-[#6B6650]">
-            <Link href="/" className="rounded-full px-3.5 py-1.5 hover:bg-white hover:text-[#6B7256] transition">
+      {/* Navigation Sub-bar */}
+        <div className="bg-[#6B7256] border-t border-[#5A6047] shadow-inner">
+          <nav className="mx-auto flex max-w-7xl items-center gap-2 px-4 sm:px-6 py-2 overflow-x-auto text-sm font-medium text-white">
+            <Link
+              href="/"
+              className="rounded-full px-4 py-1.5 transition hover:bg-white/15 hover:text-white"
+            >
               Home
             </Link>
-            
-            <Link href="/healthcare" className="rounded-full px-3.5 py-1.5 hover:bg-white hover:text-[#6B7256] transition">
+
+            <Link
+              href="/products"
+              className="rounded-full px-4 py-1.5 transition hover:bg-white/15 hover:text-white"
+            >
               Healthcare
             </Link>
-            
-            <Link href="/orders" className="rounded-full px-3.5 py-1.5 hover:bg-white hover:text-[#6B7256] transition">
-              My Orders
-            </Link>
+
             <Link
               href="/prescription"
-              className="flex items-center gap-1.5 rounded-full bg-[#8B7355]/15 text-[#8B7355] px-3.5 py-1.5 hover:bg-[#8B7355]/25 transition"
+              className="flex items-center gap-2 rounded-full bg-white/20 text-white px-4 py-1.5 font-semibold hover:bg-white/30 transition shadow-sm ml-auto sm:ml-0"
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-[#8B7355]" />
+              <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
               Upload Prescription
             </Link>
+                {user?.role === "PHARMACY_ADMIN" && (
+                <Link
+                  href="/admin"
+                  className="flex items-center gap-2 rounded-full bg-white/20 text-white px-4 py-1.5 font-semibold hover:bg-white/30 transition shadow-sm"
+                >
+                   Admin Dashboard
+                </Link>
+              )}
+            
           </nav>
         </div>
       </header>
@@ -402,7 +459,7 @@ export default function Navbar() {
                   disabled={loading}
                   className="flex w-full items-center gap-3 rounded-xl border border-[#6B7256] p-3 text-sm font-semibold text-[#6B7256] hover:bg-[#6B7256]/10 transition"
                 >
-                  <span>📍</span>
+                  <span><i className="fa-solid fa-location-dot"></i></span>
                   <span>{loading ? "Locating..." : "Use Current Location"}</span>
                 </button>
 

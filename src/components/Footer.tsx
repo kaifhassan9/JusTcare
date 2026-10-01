@@ -119,10 +119,22 @@ export default function Footer() {
 
       </div>
 
-      {/* Bottom Copyright */}
+      {/* Bottom Copyright & Legal Links */}
       <div className="border-t border-[#21261C] bg-[#21261C]/80">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6 text-center text-xs font-semibold text-[#9E9584]">
-          © {new Date().getFullYear()} JusTCare. All rights reserved.
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-semibold text-[#9E9584]">
+          <p>© {new Date().getFullYear()} JusTCare. All rights reserved.</p>
+          
+          <div className="flex flex-wrap items-center justify-center gap-6 text-[#C5BAA2]">
+            <Link href="/terms" className="hover:text-[#F5F2EB] transition-colors">
+              Terms & Conditions
+            </Link>
+            <Link href="/privacy" className="hover:text-[#F5F2EB] transition-colors">
+              Privacy Policy
+            </Link>
+            <Link href="/refund" className="hover:text-[#F5F2EB] transition-colors">
+              Refund Policy
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

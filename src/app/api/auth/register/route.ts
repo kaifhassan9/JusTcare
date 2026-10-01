@@ -8,13 +8,26 @@ export async function POST(request: Request) {
 
     const { name, email, password } = body;
 
-    // Validate input
+       // Validate input
     if (!name || !email || !password) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "Name, email and password are required",
-        },
+        { success: false, message: "Name, email and password are required" },
+        { status: 400 }
+      );
+    }
+
+    // Basic email format check
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json(
+        { success: false, message: "Please provide a valid email address" },
+        { status: 400 }
+      );
+    }
+
+    // Minimum password strength
+    if (password.length < 8) {
+      return NextResponse.json(
+        { success: false, message: "Password must be at least 8 characters" },
         { status: 400 }
       );
     }

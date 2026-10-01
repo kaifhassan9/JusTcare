@@ -21,8 +21,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No products provided" }, { status: 400 });
     }
 
-    // Validate every row before inserting anything — all-or-nothing,
-    // so a bad row doesn't leave you with half-imported data
+    // Validate every row before inserting/updating
     const errors: string[] = [];
 
     const validated = products.map((p, index) => {
@@ -57,13 +56,54 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await prisma.product.createMany({
-      data: validated,
+    // Fetch existing products to determine duplicates by name (case-insensitive)
+    const existingProducts = await prisma.product.findMany({
+      select: { id: true, name: true },
+    });
+
+    const existingMap = new Map<string, any>();
+    for (const p of existingProducts) {
+      existingMap.set(p.name.trim().toLowerCase(), p.id);
+    }
+
+    let createdCount = 0;
+    let updatedCount = 0;
+
+    // Use Prisma transaction to perform updates for duplicates and inserts for new items
+    await prisma.$transaction(async (tx) => {
+      for (const item of validated) {
+        const lowerName = item.name.toLowerCase();
+        const existingId = existingMap.get(lowerName);
+
+        if (existingId !== undefined) {
+          // Product exists -> Update fields
+          await tx.product.update({
+            where: { id: existingId },
+            data: {
+              category: item.category,
+              price: item.price,
+              image: item.image,
+              requiresPrescription: item.requiresPrescription,
+              stockCount: item.stockCount,
+              description: item.description,
+            },
+          });
+          updatedCount++;
+        } else {
+          // Product does not exist -> Create new record
+          await tx.product.create({
+            data: item,
+          });
+          createdCount++;
+        }
+      }
     });
 
     return NextResponse.json({
-      message: `${result.count} products imported successfully`,
-      count: result.count,
+      message: `Import complete: ${createdCount} created, ${updatedCount} updated.`,
+      count: createdCount + updatedCount,
+      createdCount,
+      updatedCount,
     });
   } catch (error) {
     console.error("Bulk product import error:", error);

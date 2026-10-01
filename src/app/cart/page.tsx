@@ -72,8 +72,11 @@ export default function CartPage() {
               >
                 <div className="flex flex-col sm:flex-row gap-5">
 
-                  {/* Product Image */}
-                  <div className="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#F7F5EF] border border-[#DDD3BC] p-2">
+                    {/* Product Image  */}
+                  <Link
+                    href={`/products/${item.id}`}
+                    className="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#F7F5EF] border border-[#DDD3BC] p-2 hover:border-[#6B7256] transition"
+                  >
                     {item.image?.startsWith("http") ? (
                       <img
                         src={item.image}
@@ -83,7 +86,7 @@ export default function CartPage() {
                     ) : (
                       <span className="text-5xl">{item.image}</span>
                     )}
-                  </div>
+                  </Link>
 
                   {/* Item Details */}
                   <div className="flex flex-1 flex-col justify-between">

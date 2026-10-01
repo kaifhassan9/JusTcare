@@ -9,6 +9,7 @@ type OrderItemInput = {
 
 export async function POST(request: Request) {
   console.log("🔥 POST /api/orders CALLED");
+  
   try {
     // Check logged-in customer
     const user = await getCurrentUser();
@@ -95,7 +96,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create order items using prices from DATABASE
+       // Create order items using prices from DATABASE
     const orderItems = items.map((item) => {
       const product = products.find(
         (product) => product.id === item.productId
@@ -105,8 +106,13 @@ export async function POST(request: Request) {
         throw new Error("Product not found");
       }
 
-      if (item.quantity <= 0) {
+      if (item.quantity <= 0 || !Number.isInteger(item.quantity)) {
         throw new Error("Invalid product quantity");
+      }
+
+      // NEW: verify stock is actually available before allowing the order
+      if (product.stockCount < item.quantity) {
+        throw new Error(`Insufficient stock for ${product.name}. Only ${product.stockCount} left.`);
       }
 
       return {
@@ -142,7 +148,6 @@ export async function POST(request: Request) {
     });
 
     if (recentOrder) {
-      // console.log("🛑 DUPLICATE ORDER BLOCKED IN DB:", recentOrder.orderNumber);
       return NextResponse.json(
         {
           success: true,
@@ -159,44 +164,66 @@ export async function POST(request: Request) {
       );
     }
 
-    // Generate unique order number
-    const orderNumber = `MED${Date.now()}`;
-    // console.log("🔥 ABOUT TO CREATE ORDER:", orderNumber);
-
-    // Create Order + OrderItems together
-    const order = await prisma.order.create({
-      data: {
-        orderNumber,
+    // 📌 SAVE ADDRESS AUTOMATICALLY IF NOT ALREADY SAVED FOR USER
+    const existingAddress = await prisma.address.findFirst({
+      where: {
         userId: user.id,
-
-        customerName: name,
-        customerPhone: phone,
-        customerEmail: email || null,
-
         address,
-        city,
-        state,
         pincode,
-
-        totalAmount,
-
-        status: "PENDING",
-        paymentMethod: "COD",
-
-        items: {
-          create: orderItems,
-        },
-      },
-
-      include: {
-        items: {
-          include: {
-            product: true,
-          },
-        },
       },
     });
-    // console.log("✅ ORDER CREATED:", order.id, order.orderNumber);
+
+    if (!existingAddress) {
+      await prisma.address.create({
+        data: {
+          userId: user.id,
+          name,
+          phone,
+          address,
+          city,
+          state,
+          pincode,
+          isDefault: false,
+        },
+      });
+    }
+
+        // Generate unique order number
+    const orderNumber = `MED${Date.now()}`;
+
+    // Create the order AND decrement stock atomically —
+    // if either fails, neither happens (prevents stock/order mismatch)
+    const order = await prisma.$transaction(async (tx) => {
+      const newOrder = await tx.order.create({
+        data: {
+          orderNumber,
+          userId: user.id,
+          customerName: name,
+          customerPhone: phone,
+          customerEmail: email || null,
+          address,
+          city,
+          state,
+          pincode,
+          totalAmount,
+          status: "PENDING",
+          paymentMethod: "COD",
+          items: { create: orderItems },
+        },
+        include: {
+          items: { include: { product: true } },
+        },
+      });
+
+      for (const item of orderItems) {
+        await tx.product.update({
+          where: { id: item.productId },
+          data: { stockCount: { decrement: item.quantity } },
+        });
+      }
+
+      return newOrder;
+    });
 
     return NextResponse.json(
       {
@@ -212,14 +239,20 @@ export async function POST(request: Request) {
       },
       { status: 201 }
     );
-  } catch (error) {
+   } catch (error) {
     console.error("Create order error:", error);
 
+    // Distinguish "expected" validation failures (bad quantity, out of stock)
+    // from genuine unexpected server errors
+    if (error instanceof Error && (error.message.includes("stock") || error.message.includes("quantity"))) {
+      return NextResponse.json(
+        { success: false, message: error.message },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
-      {
-        success: false,
-        message: "Failed to place order.",
-      },
+      { success: false, message: "Failed to place order." },
       { status: 500 }
     );
   }

@@ -1,12 +1,15 @@
 "use client";
 import Navbar from "@/components/Navbar";
-import PrescriptionSection from "@/components/PrescriptionSection";
 import WhyChooseUs from "@/components/WhyChooseUs";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import ProductRow from "@/components/productRow";
 import { useRouter } from "next/navigation";
+import AboutSection from "@/components/AboutSection";
+import FAQSection from "@/components/FAQSection";
+import BrandsSection from "@/components/BrandsSection";
+import WellnessBanner from "@/components/WellnessBanner";
 
 type Product = {
   id: number;
@@ -21,14 +24,14 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-const [heroSearch, setHeroSearch] = useState("");
+  const [heroSearch, setHeroSearch] = useState("");  
 
-function handleHeroSearch(e: React.FormEvent) {
-  e.preventDefault();
-  if (heroSearch.trim()) {
-    router.push(`/products?search=${encodeURIComponent(heroSearch.trim())}`);
+  function handleHeroSearch(e: React.FormEvent) {
+    e.preventDefault();
+    if (heroSearch.trim()) {
+      router.push(`/products?search=${encodeURIComponent(heroSearch.trim())}`);
+    }
   }
-}
 
   useEffect(() => {
     async function fetchProducts() {
@@ -49,11 +52,10 @@ function handleHeroSearch(e: React.FormEvent) {
     fetchProducts();
   }, []);
 
-  // Derive rows from real data — no separate API calls needed
   const under100 = products.filter((p) => p.price < 100);
 
   const newest = [...products]
-    .sort((a, b) => b.id - a.id) // higher id = more recently created
+    .sort((a, b) => b.id - a.id)
     .slice(0, 8);
 
   const categories = Array.from(new Set(products.map((p) => p.category)));
@@ -67,7 +69,7 @@ function handleHeroSearch(e: React.FormEvent) {
     <main className="min-h-screen bg-[#F7F9FC]">
       <Navbar />
 
-      {/* Hero — full width, image as background */}
+      {/* Hero */}
       <section
         className="w-full bg-[#6B7256] bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: "url('/pharmacy full image.png')" }}
@@ -75,36 +77,29 @@ function handleHeroSearch(e: React.FormEvent) {
         <div className="bg-[#6B7256]/60 w-full">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 sm:py-14">
             <div className="max-w-xl space-y-5 text-center lg:text-left">
-
-              <h1 className="font-[family-name:var(--font-poppins)] text-3xl sm:text-4xl font-bold tracking-tight text-white leading-tight">
+              <h1 className="font-[family-name:var(--font-poppins)] text-2xl sm:text-4xl font-bold tracking-tight text-white leading-tight">
                 TRUSTED HEALTHCARE,<br />
                 DELIVERED TO YOU.
               </h1>
 
-              <p className="max-w-md mx-auto lg:mx-0 text-sm sm:text-base text-white/80 leading-relaxed">
-                Order genuine medicines and everyday healthcare products from your trusted local pharmacy.
-              </p>
-
               <div className="max-w-md mx-auto lg:mx-0 pt-2">
-                              <form onSubmit={handleHeroSearch} className="max-w-md mx-auto lg:mx-0 pt-2">
-                <div className="flex items-center rounded-full bg-white px-5 py-3 shadow-md">
-                  <svg className="h-5 w-5 text-[#8B8570] mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  <input
-                    type="text"
-                    value={heroSearch}
-                    onChange={(e) => setHeroSearch(e.target.value)}
-                    placeholder="Search medicines..."
-                    className="w-full bg-transparent text-sm outline-none
-                     placeholder-[#8B8570] text-[#3D3A2E]"
-                     
-                  />
-                   <button type="submit" className="rounded-full bg-[#6B7256] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#5a6047] transition shrink-0">
-              Search
-            </button>
-                </div>
-              </form>
+                <form onSubmit={handleHeroSearch} className="max-w-md mx-auto lg:mx-0 pt-2">
+                  <div className="flex items-center rounded-full bg-white px-5 py-3 shadow-md">
+                    <svg className="h-5 w-5 text-[#8B8570] mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input
+                      type="text"
+                      value={heroSearch}
+                      onChange={(e) => setHeroSearch(e.target.value)}
+                      placeholder="Search medicines..."
+                      className="w-full bg-transparent text-sm outline-none placeholder-[#8B8570] text-[#3D3A2E]"
+                    />
+                    <button type="submit" className="rounded-full bg-[#6B7256] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#5a6047] transition shrink-0">
+                      Search
+                    </button>
+                  </div>
+                </form>
               </div>
 
               <Link
@@ -118,40 +113,73 @@ function handleHeroSearch(e: React.FormEvent) {
         </div>
       </section>
 
-      {/* Promo Cards Row — like Apollo's colored cards below hero */}
+      {/* Promo Cards Row */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 py-6">
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
 
-          <div className="flex items-center justify-between rounded-2xl bg-[#EDE6D6] p-4 cursor-pointer hover:shadow-md transition">
-            <div>
-              <p className="text-xs font-bold text-[#3D3A2E]">Get 20% off</p>
-              <p className="text-[11px] text-[#8B7355] font-semibold">on Medicines</p>
+          {/* Upload Prescription */}
+          <Link
+            href="/prescription"
+            className="flex items-center justify-between rounded-2xl bg-[#E4E7DC] p-4 cursor-pointer hover:shadow-md transition"
+          >
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-lg">
+                <i className="fa-regular fa-file text-black"></i>
+              </span>
+              <div>
+                <p className="text-sm font-bold text-[#3D3A2E]">Upload</p>
+                <p className="text-xs text-[#6B7256] font-semibold">Prescription</p>
+              </div>
             </div>
-            <span className="text-lg">📋</span>
+            <span className="text-[#6B7256] text-lg"><i className="fa-solid fa-circle-arrow-right"></i></span>
+          </Link>
+
+          {/* Doctor Appointment */}
+          <div className="flex items-center justify-between rounded-2xl bg-[#E4DEEF] p-4 opacity-70 cursor-not-allowed">
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-lg">
+                <i className="fa-solid fa-user-doctor text-blue-500"></i>
+              </span>
+              <div>
+                <p className="text-sm font-bold text-[#3D3A2E]">Doctor</p>
+                <p className="text-xs text-[#7B6F8F] font-semibold">Appointment</p>
+              </div>
+            </div>
+            <span className="rounded-full bg-white/70 px-2 py-0.5 text-[9px] font-bold text-[#7B6F8F]">
+              SOON
+            </span>
           </div>
 
-          <div className="flex items-center justify-between rounded-2xl bg-[#E4E7DC] p-4 cursor-pointer hover:shadow-md transition">
-            <div>
-              <p className="text-xs font-bold text-[#3D3A2E]">Upload</p>
-              <p className="text-[11px] text-[#6B7256] font-semibold">Prescription</p>
+          {/* Health Insurance */}
+          <div className="flex items-center justify-between rounded-2xl bg-[#F0E6D2] p-4 opacity-70 cursor-not-allowed">
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-lg">
+                <i className="fa-solid fa-shield-halved text-green-500"></i>
+              </span>
+              <div>
+                <p className="text-sm font-bold text-[#3D3A2E]">Health</p>
+                <p className="text-xs text-[#8B7355] font-semibold">Insurance</p>
+              </div>
             </div>
-            <span className="text-lg">💊</span>
+            <span className="rounded-full bg-white/70 px-2 py-0.5 text-[9px] font-bold text-[#8B7355]">
+              SOON
+            </span>
           </div>
 
-          <div className="flex items-center justify-between rounded-2xl bg-[#F0E6D2] p-4 cursor-pointer hover:shadow-md transition">
-            <div>
-              <p className="text-xs font-bold text-[#3D3A2E]">Track Your</p>
-              <p className="text-[11px] text-[#8B7355] font-semibold">Order</p>
+          {/* Lab Tests */}
+          <div className="flex items-center justify-between rounded-2xl bg-[#F3DEDE] p-4 opacity-70 cursor-not-allowed">
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-lg">
+                <i className="fa-solid fa-microscope text-red-500"></i>
+              </span>
+              <div>
+                <p className="text-sm font-bold text-[#3D3A2E]">Lab Tests</p>
+                <p className="text-xs text-[#B06868] font-semibold">At Home</p>
+              </div>
             </div>
-            <span className="text-lg">📦</span>
-          </div>
-
-          <div className="flex items-center justify-between rounded-2xl bg-[#EAE3D3] p-4 cursor-pointer hover:shadow-md transition">
-            <div>
-              <p className="text-xs font-bold text-[#3D3A2E]">24/7</p>
-              <p className="text-[11px] text-[#6B7256] font-semibold">Support</p>
-            </div>
-            <span className="text-lg">💬</span>
+            <span className="rounded-full bg-white/70 px-2 py-0.5 text-[9px] font-bold text-[#B06868]">
+              SOON
+            </span>
           </div>
 
         </div>
@@ -166,19 +194,20 @@ function handleHeroSearch(e: React.FormEvent) {
         <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
           {[
             { name: "Medicines", icon: "💊" },
-            { name: "Personal Care", icon: "🧴" },
+            { name: "Skin Care", icon: "🧴" },
             { name: "Baby Care", icon: "🍼" },
             { name: "Healthcare Devices", icon: "🩺" },
           ].map((category) => (
-            <div
+            <Link
               key={category.name}
-              className="cursor-pointer rounded-2xl bg-[#EDE6D6] border border-[#DDD3BC] p-6 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+              href={`/products?category=${encodeURIComponent(category.name)}`}
+              className="cursor-pointer rounded-2xl bg-[#EDE6D6] border border-[#DDD3BC] p-6 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-md block"
             >
               <div className="text-3xl">{category.icon}</div>
               <h3 className="mt-3 font-semibold text-slate-700 text-sm">
                 {category.name}
               </h3>
-            </div>
+            </Link>
           ))}
         </div>
       </section>
@@ -206,20 +235,14 @@ function handleHeroSearch(e: React.FormEvent) {
             products={newest}
             viewAllHref="/products"
           />
-
-          {categoryRows.map((row) => (
-            <ProductRow
-              key={row.category}
-              title={row.category}
-              products={row.items}
-              viewAllHref="/products"
-            />
-          ))}
         </>
       )}
 
-      <PrescriptionSection />
+      <BrandsSection />
+      <WellnessBanner />
       <WhyChooseUs />
+      <AboutSection />
+      <FAQSection />
       <Footer />
     </main>
   );

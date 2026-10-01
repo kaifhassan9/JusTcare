@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -11,6 +12,8 @@ export default function AccountPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const [activePanel, setActivePanel] = useState<"none" | "name" | "password">("none");
 
   const [name, setName] = useState("");
   const [savingName, setSavingName] = useState(false);
@@ -101,10 +104,22 @@ export default function AccountPage() {
     }
   }
 
+  async function handleLogout() {
+    try {
+      const response = await fetch("/api/auth/logout", { method: "POST" });
+      const data = await response.json();
+      if (data.success) {
+        window.location.href = "/";
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  }
+
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#F7F5EF] flex items-center justify-center">
-        <p className="text-[#6B6650] font-bold">Loading account...</p>
+      <main className="min-h-screen bg-[#F7F5EF] flex items-center justify-center p-4">
+        <p className="text-[#6B6650] font-bold text-sm sm:text-base">Loading account...</p>
       </main>
     );
   }
@@ -115,94 +130,138 @@ export default function AccountPage() {
     <main className="min-h-screen bg-[#F7F5EF] text-[#3D3A2E]">
       <Navbar />
 
-      <section className="mx-auto max-w-2xl px-4 sm:px-6 py-10">
-        <h1 className="text-3xl font-extrabold text-[#3D3A2E]">My Account</h1>
-        <p className="mt-1 text-sm text-[#6B6650]">Manage your account details.</p>
+      <section className="mx-auto max-w-2xl px-4 sm:px-6 py-6 sm:py-8">
 
-        {/* Profile Info */}
-        <div className="mt-8 rounded-2xl border border-[#DDD3BC] bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-extrabold text-[#3D3A2E]">Profile Information</h2>
+        {/* Profile Header Card */}
+        <div className="rounded-3xl bg-[#6B7256] p-5 sm:p-6 text-white shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-full bg-white/15 text-xl sm:text-2xl font-bold">
+              {user.name.charAt(0).toUpperCase()}
+            </div>
 
-          <div className="mt-5">
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#8B8570]">
-              Email
-            </label>
-            <p className="mt-1 text-sm text-[#3D3A2E]">
-              {user.email}
-              <span className="ml-2 text-xs text-[#8B8570]">(cannot be changed)</span>
-            </p>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-lg sm:text-xl font-bold font-[family-name:var(--font-poppins)] truncate">
+                {user.name}
+              </h1>
+              <p className="mt-0.5 text-xs sm:text-sm text-white/75 truncate">{user.email}</p>
+            </div>
           </div>
-
-          <div className="mt-5">
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#8B8570]">
-              Full Name
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="mt-2 w-full rounded-xl border border-[#DDD3BC] bg-[#F7F5EF] px-4 py-3 text-sm text-[#3D3A2E] outline-none focus:border-[#6B7256] focus:bg-white transition-all"
-            />
-          </div>
-
-          {nameMessage && (
-            <p className="mt-3 text-sm font-medium text-[#6B7256]">{nameMessage}</p>
-          )}
-
-          <button
-            onClick={handleUpdateName}
-            disabled={savingName}
-            className="mt-4 rounded-full bg-[#6B7256] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#5a6047] disabled:opacity-50 transition"
-          >
-            {savingName ? "Saving..." : "Save Name"}
-          </button>
         </div>
 
-        {/* Change Password */}
-        <div className="mt-6 rounded-2xl border border-[#DDD3BC] bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-extrabold text-[#3D3A2E]">Change Password</h2>
+        {/* Settings List */}
+        <div className="mt-6 rounded-2xl border border-[#DDD3BC] bg-white overflow-hidden shadow-sm">
 
-          <div className="mt-5 space-y-4">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#8B8570]">
-                Current Password
-              </label>
+          <SettingsRow
+            label="Edit Name"
+            active={activePanel === "name"}
+            onClick={() => setActivePanel(activePanel === "name" ? "none" : "name")}
+          />
+
+          {activePanel === "name" && (
+            <div className="px-4 sm:px-5 pb-5 bg-[#F7F5EF] border-t border-[#EDE6D6]">
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter full name"
+                className="mt-4 w-full rounded-xl border border-[#DDD3BC] bg-white px-4 py-3 text-base sm:text-sm text-[#3D3A2E] outline-none focus:border-[#6B7256] focus:ring-2 focus:ring-[#6B7256]/20 transition"
+              />
+              {nameMessage && (
+                <p className="mt-2 text-xs font-medium text-[#6B6650]">{nameMessage}</p>
+              )}
+              <button
+                onClick={handleUpdateName}
+                disabled={savingName}
+                className="mt-3 w-full sm:w-auto rounded-full bg-[#6B7256] px-5 py-2.5 text-xs font-bold text-white hover:bg-[#5a6047] active:scale-[0.98] disabled:opacity-50 transition touch-manipulation"
+              >
+                {savingName ? "Saving..." : "Save Name"}
+              </button>
+            </div>
+          )}
+
+          <SettingsRow
+            label="Change Password"
+            active={activePanel === "password"}
+            onClick={() => setActivePanel(activePanel === "password" ? "none" : "password")}
+          />
+
+          {activePanel === "password" && (
+            <div className="px-4 sm:px-5 pb-5 bg-[#F7F5EF] border-t border-[#EDE6D6] space-y-3">
               <input
                 type="password"
+                placeholder="Current password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="mt-2 w-full rounded-xl border border-[#DDD3BC] bg-[#F7F5EF] px-4 py-3 text-sm text-[#3D3A2E] outline-none focus:border-[#6B7256] focus:bg-white transition-all"
+                autoCapitalize="none"
+                autoCorrect="off"
+                className="mt-4 w-full rounded-xl border border-[#DDD3BC] bg-white px-4 py-3 text-base sm:text-sm text-[#3D3A2E] outline-none focus:border-[#6B7256] focus:ring-2 focus:ring-[#6B7256]/20 transition"
               />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#8B8570]">
-                New Password
-              </label>
               <input
                 type="password"
+                placeholder="New password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="mt-2 w-full rounded-xl border border-[#DDD3BC] bg-[#F7F5EF] px-4 py-3 text-sm text-[#3D3A2E] outline-none focus:border-[#6B7256] focus:bg-white transition-all"
+                autoCapitalize="none"
+                autoCorrect="off"
+                className="w-full rounded-xl border border-[#DDD3BC] bg-white px-4 py-3 text-base sm:text-sm text-[#3D3A2E] outline-none focus:border-[#6B7256] focus:ring-2 focus:ring-[#6B7256]/20 transition"
               />
+              {passwordMessage && (
+                <p className="text-xs font-medium text-[#6B6650]">{passwordMessage}</p>
+              )}
+              <button
+                onClick={handleChangePassword}
+                disabled={savingPassword}
+                className="w-full sm:w-auto rounded-full bg-[#8B7355] px-5 py-2.5 text-xs font-bold text-white hover:bg-[#7a6549] active:scale-[0.98] disabled:opacity-50 transition touch-manipulation"
+              >
+                {savingPassword ? "Saving..." : "Update Password"}
+              </button>
             </div>
-          </div>
-
-          {passwordMessage && (
-            <p className="mt-3 text-sm font-medium text-[#6B7256]">{passwordMessage}</p>
           )}
 
-          <button
-            onClick={handleChangePassword}
-            disabled={savingPassword}
-            className="mt-4 rounded-full bg-[#8B7355] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#7a6549] disabled:opacity-50 transition"
-          >
-            {savingPassword ? "Saving..." : "Change Password"}
-          </button>
+          <Link href="/orders" className="block">
+            <SettingsRow label="My Orders" isLink />
+          </Link>
+
+          <Link href="/my-prescriptions" className="block">
+            <SettingsRow label="My Prescriptions" isLink />
+          </Link>
         </div>
+
+        {/* Logout */}
+        <button
+          onClick={handleLogout}
+          className="mt-6 w-full rounded-2xl bg-red-500 py-3.5 sm:py-4 text-xs sm:text-sm font-bold text-white hover:bg-red-600 active:scale-[0.98] transition touch-manipulation shadow-sm"
+        >
+          Log Out
+        </button>
       </section>
 
       <Footer />
     </main>
+  );
+}
+
+function SettingsRow({
+  label,
+  active,
+  isLink,
+  onClick,
+}: {
+  label: string;
+  active?: boolean;
+  isLink?: boolean;
+  onClick?: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex w-full items-center justify-between px-4 sm:px-5 py-4 text-left border-b border-[#EDE6D6] last:border-0 transition touch-manipulation active:bg-[#F7F5EF] ${
+        active ? "bg-[#6B7256]/5" : "hover:bg-[#F7F5EF]"
+      }`}
+    >
+      <span className="text-xs sm:text-sm font-semibold text-[#3D3A2E]">{label}</span>
+      <span className="text-[#8B8570] text-sm">{isLink ? "→" : active ? "▾" : "›"}</span>
+    </button>
   );
 }
