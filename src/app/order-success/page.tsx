@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -35,7 +36,7 @@ const orderStatuses = [
   },
 ];
 
-export default function OrderSuccessPage() {
+function OrderSuccessContent() {
   const searchParams = useSearchParams();
   const orderNumber = searchParams.get("orderNumber");
 
@@ -368,5 +369,28 @@ export default function OrderSuccessPage() {
 
       <Footer />
     </main>
+  );
+}
+
+export default function OrderSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-[#FAF8F5]">
+          <Navbar />
+          <section className="flex min-h-[75vh] items-center justify-center px-4">
+            <div className="text-center">
+              <div className="text-4xl animate-spin">⏳</div>
+              <p className="mt-4 text-sm sm:text-base font-bold text-[#2C3325]">
+                Loading order details...
+              </p>
+            </div>
+          </section>
+          <Footer />
+        </main>
+      }
+    >
+      <OrderSuccessContent />
+    </Suspense>
   );
 }
