@@ -2,11 +2,19 @@
   "name": "medical-store",
   "version": "0.1.0",
   "private": true,
-    "scripts": {
+  "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
+    "postinstall": "prisma generate",
     "start": "next start",
-    "postinstall": "prisma generate"
+    "lint": "next lint"
+  },
+  "allowScripts": {
+    "@prisma/engines": true,
+    "esbuild": true,
+    "prisma": true,
+    "sharp": true,
+    "unrs-resolver": true
   },
   "dependencies": {
     "@lottiefiles/dotlottie-web": "^0.80.0",
