@@ -49,7 +49,7 @@ export default function Footer() {
             </Link>
 
             <Link 
-              href="/medicines" 
+             href="/products?category=Medicines"
               className="block text-[#C5BAA2] hover:text-[#F5F2EB] hover:translate-x-1 transition-all duration-200"
             >
               Medicines
